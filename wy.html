@@ -1,0 +1,68 @@
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="black" name="apple-mobile-web-app-status-bar-style">
+  <meta content="320" name="MobileOptimized">
+  <title>网页浏览器</title>
+<style>
+.content {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+</style>
+</head>
+<body>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const encodedParam = urlParams.get('c');
+
+if (encodedParam) {
+    try {
+        const trueUrl = atob(encodedParam);
+        if (trueUrl.includes('http')) {
+            const iframe = document.createElement('iframe');
+            iframe.className = 'content';
+            iframe.src = trueUrl;
+            iframe.onload = () => {
+                bindMouseWheel(iframe);
+            };
+            document.body.appendChild(iframe);
+        } else {
+            console.log('无效URL');
+        }
+    } catch (e) {
+        console.error('URL解码失败:', e);
+    }
+}
+
+function bindMouseWheel(iframe) {
+    try {
+        const doc = iframe.contentWindow.document;
+        const isFirefox = navigator.userAgent.includes('Firefox');
+        
+        function handleMouseWheel(e) {
+            e.preventDefault();
+            const up = isFirefox ? e.detail < 0 : e.wheelDelta > 0;
+            const scrollAmount = up ? -50 : 50;
+            doc.body.scrollTop = doc.documentElement.scrollTop += scrollAmount;
+        }
+
+        if (isFirefox) {
+            doc.addEventListener('DOMMouseScroll', handleMouseWheel, false);
+        } else {
+            doc.onmousewheel = handleMouseWheel;
+        }
+    } catch (e) {
+        console.error('跨域访问iframe失败:', e);
+    }
+}
+</script>
+</body>
+</html>
